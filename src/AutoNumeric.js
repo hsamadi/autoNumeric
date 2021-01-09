@@ -8480,7 +8480,7 @@ To solve that, you'd need to either set \`decimalPlacesRawValue\` to \`null\`, o
         const left = value.substring(0, this.selection.start);
         const right = value.substring(this.selection.end, value.length);
 
-        return [left, right];
+        return [AutoNumeric._a2e(AutoNumeric._p2e(left)), AutoNumeric._a2e(AutoNumeric._p2e(right))];
     }
 
     /**
@@ -9037,7 +9037,8 @@ To solve that, you'd need to either set \`decimalPlacesRawValue\` to \`null\`, o
             return true;
         }
 
-        const eventNumber = Number(this.eventKey);
+        const convertedEventKey = AutoNumeric._a2e(AutoNumeric._p2e(this.eventKey));
+        const eventNumber = Number(convertedEventKey);
         if (eventNumber >= 0 && eventNumber <= 9) {
             // If the user tries to insert a digit
             if (this.settings.isNegativeSignAllowed && left === '' && AutoNumericHelper.contains(right, '-')) {
@@ -9049,11 +9050,11 @@ To solve that, you'd need to either set \`decimalPlacesRawValue\` to \`null\`, o
             if (this.settings.maximumValue <= 0 &&
                 this.settings.minimumValue < this.settings.maximumValue &&
                 !AutoNumericHelper.contains(AutoNumericHelper.getElementValue(this.domElement), this.settings.negativeSignCharacter) &&
-                this.eventKey !== '0') {
+                convertedEventKey !== '0') {
                 left = `-${left}`;
             }
 
-            this._setValueParts(`${left}${this.eventKey}`, right);
+            this._setValueParts(`${left}${convertedEventKey}`, right);
 
             return true;
         }
@@ -9101,7 +9102,8 @@ To solve that, you'd need to either set \`decimalPlacesRawValue\` to \`null\`, o
             }
         }
 
-        const value = this.constructor._addGroupSeparators(elementValue, this.settings, this.isFocused, this.rawValue);
+        const convElementValue = AutoNumeric._a2e(AutoNumeric._p2e(elementValue));
+        const value = this.constructor._addGroupSeparators(convElementValue, this.settings, this.isFocused, this.rawValue);
         let position = value.length;
         if (value) {
             // Prepare regexp which searches for cursor position from unformatted left part
@@ -9368,6 +9370,16 @@ To solve that, you'd need to either set \`decimalPlacesRawValue\` to \`null\`, o
      */
     static _serializeLocalizedArray(form, serializedSpaceCharacter = '+', forcedOutputFormat = null) {
         return this._serialize(form, true, 'localized', serializedSpaceCharacter, forcedOutputFormat);
+    }
+
+    /* Replace Persian numbers by their English equivalents. */
+    static _p2e(value) {
+        return value.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+    }
+
+    /* Replace Arabic numbers by their English equivalents. */
+    static _a2e(value) {
+        return value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
     }
 }
 
